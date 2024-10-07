@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package nsfw_detector;
+
+message NSFWDetectorRequest {
+    string video_id = 1;
+}
+
+message NSFWDetectorResponse {
+    repeated string categories = 1;
+}
+
+service NSFWDetector {
+    rpc DetectNSFW(NSFWDetectorRequest) returns (NSFWDetectorResponse) {};
+}
