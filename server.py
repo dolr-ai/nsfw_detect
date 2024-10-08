@@ -93,25 +93,36 @@ class NSFWDetectorServicer(nsfw_detector_pb2_grpc.NSFWDetectorServicer):
         _LOGGER.info(self.pipe3c.model.config) 
         _LOGGER.info(self.pipe5c.model.config)
         _LOGGER.info('='*100)
+
     def DetectNSFW(self, request, context):
         _LOGGER.info("Request received")
         video_id = request.video_id
-        nsfw_tags = self.process_frames(video_id)
-        return nsfw_detector_pb2.NSFWDetectorResponse(categories=nsfw_tags)
+        nsfw_tag, gore_tag = self.process_frames(video_id)
+        response = nsfw_detector_pb2.NSFWDetectorResponse(nsfw_ec=nsfw_tag, nsfw_gore=gore_tag)
+        return response
 
     def process_frames(self, video_id):
         frames = get_images_from_gcs("yral-video-frames", video_id)
         nsfw_tags = []
+        gore_tags = []
         for frame in frames:
             nsfw_tags.append(self.nsfw_detector.nsfw_detect(frame['image'])['res'])
+            gore_tags.append(self.nsfw_detector.detect_nsfw_gore(frame['image']))
         tag_priority = "explicit nudity provocative neutral".split()
+        gore_priority = ["UNKNOWN", "VERY_UNLIKELY", "UNLIKELY", "POSSIBLE", "LIKELY", "VERY_LIKELY"][::-1]
         # Sort nsfw_tags based on the priority defined in tag_priority
         nsfw_tags.sort(key=lambda tag: tag_priority.index(tag))
+        gore_tags.sort(key=lambda tag: gore_priority.index(tag))
 
+        nsfw_tag = None
+        gore_tag = None
         if len(nsfw_tags) > 0:
-            return [nsfw_tags[0]]
-        else:
-            return ['None']
+            nsfw_tag = nsfw_tags[0]
+        if len(gore_tags) > 0:
+            gore_tag = gore_tags[0]
+            
+        return [nsfw_tag, gore_tag]
+
 
         
 

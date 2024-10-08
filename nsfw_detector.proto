@@ -7,7 +7,8 @@ message NSFWDetectorRequest {
 }
 
 message NSFWDetectorResponse {
-    repeated string categories = 1;
+    string nsfw_ec = 1;
+    string nsfw_gore = 2;
 }
 
 service NSFWDetector {
