@@ -24,8 +24,8 @@ swap_size_mb = 32768
       alpn = ['h2']
 
   [services.concurrency]
-    hard_limit = 20000
-    soft_limit = 1000
+    hard_limit = 500
+    soft_limit = 250
 
 [[vm]]
   memory = '16gb'
