@@ -30,6 +30,6 @@ swap_size_mb = 32768
     soft_limit = 250
 
 [[vm]]
-  memory = '16gb'
+  memory = '8gb'
   cpu_kind = 'performance'
-  cpus = 2
+  cpus = 4
