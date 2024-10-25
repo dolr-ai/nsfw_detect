@@ -25,6 +25,7 @@ _LOGGER = logging.getLogger(__name__)
 
 _ONE_DAY = datetime.timedelta(days=1)
 _PROCESS_COUNT = multiprocessing.cpu_count()
+_LOGGER.info(f"Process count: {_PROCESS_COUNT}")
 # _PROCESS_COUNT = 1 
 _THREAD_CONCURRENCY = 10 # heuristic
 _BIND_ADDRESS = "[::]:50051"
