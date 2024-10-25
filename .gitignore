@@ -212,3 +212,5 @@ test.txt
 current_requirements.txt
 *.pkl
 Dockerfile.dev
+backfill_nsfw.py
+nsfw_responses/
