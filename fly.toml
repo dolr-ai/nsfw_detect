@@ -15,7 +15,9 @@ swap_size_mb = 32768
 [[services]]
   protocol = 'tcp'
   internal_port = 50051
-
+  auto_stop_machines = true
+  auto_start_machines = true
+  
   [[services.ports]]
     port = 443
     handlers = ['tls']
