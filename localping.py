@@ -17,7 +17,7 @@ def run():
     stub = nsfw_detector_pb2_grpc.NSFWDetectorStub(channel)
 
     # Test video ID (replace with an actual video ID for testing)
-    video_id = "00034f1c9c9148388bf6873776222535" 
+    video_id = "21727f4f6cbe496d9a410202537faff8" 
 
     try:
         print("Sending request to server")

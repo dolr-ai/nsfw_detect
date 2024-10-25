@@ -25,7 +25,6 @@ _LOGGER = logging.getLogger(__name__)
 
 _ONE_DAY = datetime.timedelta(days=1)
 _PROCESS_COUNT = multiprocessing.cpu_count()
-_LOGGER.info(f"Process count: {_PROCESS_COUNT}")
 # _PROCESS_COUNT = 1 
 _THREAD_CONCURRENCY = 10 # heuristic
 _BIND_ADDRESS = "[::]:50051"
@@ -104,15 +103,16 @@ class NSFWDetectorServicer(nsfw_detector_pb2_grpc.NSFWDetectorServicer):
 
     def process_frames(self, video_id):
         frames = get_images_from_gcs("yral-video-frames", video_id)
-        nsfw_tags = []
+        nsfw_tags = self.nsfw_detector.nsfw_detect([frame['image'] for frame in frames]) 
         gore_tags = []
         for frame in frames:
-            nsfw_tags.append(self.nsfw_detector.nsfw_detect(frame['image'])['res'])
             gore_tags.append(self.nsfw_detector.detect_nsfw_gore(frame['image']))
         tag_priority = "explicit nudity provocative neutral".split()
         gore_priority = ["UNKNOWN", "VERY_UNLIKELY", "UNLIKELY", "POSSIBLE", "LIKELY", "VERY_LIKELY"][::-1]
         # Sort nsfw_tags based on the priority defined in tag_priority
+        nsfw_tags = [i[0] for i in nsfw_tags if i[1] > 0.82 and i[2]>0.9]
         nsfw_tags.sort(key=lambda tag: tag_priority.index(tag))
+
         gore_tags.sort(key=lambda tag: gore_priority.index(tag))
 
         nsfw_tag = None
@@ -158,7 +158,7 @@ def _run_server():
 
 def main():
     multiprocessing.set_start_method("spawn", force=True)
-    _LOGGER.info(f"Binding to '{_BIND_ADDRESS}'")
+    _LOGGER.info(f"Binding to '{_BIND_ADDRESS}' with Process Count: {_PROCESS_COUNT}")
     sys.stdout.flush()
     workers = []
     for _ in range(_PROCESS_COUNT):

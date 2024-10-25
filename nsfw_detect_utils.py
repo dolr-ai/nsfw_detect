@@ -6,6 +6,7 @@ from google.oauth2 import service_account
 import logging
 
 _LOGGER = logging.getLogger(__name__)
+
 class NSFWDetect:
     def __init__(self, pipe3c, pipe5c):
         self.pipe3c = pipe3c
@@ -15,7 +16,7 @@ class NSFWDetect:
         credentials = service_account.Credentials.from_service_account_info(service_acc_creds)
         self.gclient = vision.ImageAnnotatorClient(credentials=credentials)
 
-    def nsfw_detect(self, img):
+    def nsfw_detect(self, imgs):
         marks = {'QUESTIONABLE provocative': 'provocative',
         'QUESTIONABLE porn': 'explicit',
         'QUESTIONABLE neutral': 'neutral',
@@ -34,14 +35,14 @@ class NSFWDetect:
         
         from concurrent.futures import ThreadPoolExecutor
 
-        res3c = self.pipe3c(img)
-        res5c = self.pipe5c(img)
+        res3cs = self.pipe3c(imgs)
+        res5cs = self.pipe5c(imgs)
 
-        mark3c = max(res3c, key=lambda x: x['score'])['label']
-        mark5c = max(res5c, key=lambda x: x['score'])['label'] 
+        mark3cs = [max(res3c, key=lambda x: x['score']) for res3c in res3cs]
+        mark5cs = [max(res5c, key=lambda x: x['score']) for res5c in res5cs] 
 
-        mark = marks[mark3c + ' ' + mark5c]
-        return {'res':mark, 'metadata': {'mark3c': mark3c, 'mark5c': mark5c}}
+        marks = [(marks[mark3c['label'] + ' ' + mark5c['label']], mark3c['score'], mark5c['score']) for mark3c, mark5c in zip(mark3cs, mark5cs)]
+        return marks
 
     def detect_nsfw_gore(self, pil_image):
         try:
@@ -108,6 +109,9 @@ if __name__ == "__main__":
     pipe3c, pipe5c = load_model_artifacts("model_artifacts")
     detector = NSFWDetect(pipe3c, pipe5c)
     img = Image.open("/Users/jaydhanwant/Downloads/WhatsApp Image 2024-08-29 at 13.18.09.jpeg")
-    result = detector.detect_nsfw_gore(img) 
-    print(result['violence'])
+    img2 = Image.open("/Users/jaydhanwant/Downloads/3.jpg")
+    img3 = Image.open("/Users/jaydhanwant/Documents/questionable.png")
+    imgs = [img, img2, img3]
+    result = detector.nsfw_detect(imgs) 
+    print(result)
     
