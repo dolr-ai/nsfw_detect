@@ -25,8 +25,8 @@ def run():
     try:
         print("Sending video ID request to server")
         metadata = [('authorization', f'Bearer {_JWT_TOKEN}')]
-        # video_response = stub.DetectNSFWVideoId(nsfw_detector_pb2.NSFWDetectorRequestVideoId(video_id=video_id), metadata=metadata)
-        # print(video_response)
+        video_response = stub.DetectNSFWVideoId(nsfw_detector_pb2.NSFWDetectorRequestVideoId(video_id=video_id), metadata=metadata)
+        print(video_response)
 
         print("Sending image URL request to server")
         url_response = stub.DetectNSFWURL(nsfw_detector_pb2.NSFWDetectorRequestURL(url=image_url), metadata=metadata)

@@ -19,7 +19,7 @@ def get_images_from_gcs(bucket_name='yral-video-frames', folder_name='', n_worke
     """Downloads all files from a GCS folder and returns a list of PIL images using multithreading."""
 
     
-    service_cred = os.environ.get("SERVICE_CRED")
+    service_cred = os.environ.get("FLY_IO_DEPLOY_TOKEN")
     service_acc_creds = json.loads(service_cred)
     credentials = service_account.Credentials.from_service_account_info(service_acc_creds)
     storage_client = storage.Client(credentials=credentials, project="hot-or-not-feed-intelligence")

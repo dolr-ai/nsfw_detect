@@ -11,8 +11,8 @@ class NSFWDetect:
     def __init__(self, pipe3c, pipe5c):
         self.pipe3c = pipe3c
         self.pipe5c = pipe5c
-        service_cred = os.environ.get("SERVICE_CRED")
-        service_acc_creds = json.loads(service_cred)
+        service_cred = os.environ.get("GOOGLE_CLOUD_EVENTS_BQ_SERVICE_ACCOUNT_KEY_JSON")
+        service_acc_creds = json.loads(service_cred, strict=False)
         credentials = service_account.Credentials.from_service_account_info(service_acc_creds)
         self.gclient = vision.ImageAnnotatorClient(credentials=credentials)
 

@@ -17,7 +17,7 @@ def download_blob(bucket_name, source_blob_name, destination_file_name):
     # The path to which the file should be downloaded
     # destination_file_name = "local/path/to/file"
     
-    service_cred = os.environ.get("SERVICE_CRED")
+    service_cred = os.environ.get("FLY_IO_DEPLOY_TOKEN")
     service_acc_creds = json.loads(service_cred)
     credentials = service_account.Credentials.from_service_account_info(service_acc_creds)
     storage_client = storage.Client(credentials=credentials, project="hot-or-not-feed-intelligence")

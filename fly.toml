@@ -32,4 +32,4 @@ swap_size_mb = 32768
 [[vm]]
   memory = '8gb'
   cpu_kind = 'performance'
-  cpus = 1
+  cpus = 4
