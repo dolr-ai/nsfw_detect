@@ -22,7 +22,7 @@ swap_size_mb = 32768
     port = 443
     handlers = ['tls']
 
-    [services.ports.tls_optionse
+    [services.ports.tls_optionse]
       alpn = ['h2']
 
   [services.concurrency]
