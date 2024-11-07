@@ -39,9 +39,19 @@ class NSFWDetectorStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.DetectNSFW = channel.unary_unary(
-                '/nsfw_detector.NSFWDetector/DetectNSFW',
-                request_serializer=nsfw__detector__pb2.NSFWDetectorRequest.SerializeToString,
+        self.DetectNSFWVideoId = channel.unary_unary(
+                '/nsfw_detector.NSFWDetector/DetectNSFWVideoId',
+                request_serializer=nsfw__detector__pb2.NSFWDetectorRequestVideoId.SerializeToString,
+                response_deserializer=nsfw__detector__pb2.NSFWDetectorResponse.FromString,
+                _registered_method=True)
+        self.DetectNSFWURL = channel.unary_unary(
+                '/nsfw_detector.NSFWDetector/DetectNSFWURL',
+                request_serializer=nsfw__detector__pb2.NSFWDetectorRequestURL.SerializeToString,
+                response_deserializer=nsfw__detector__pb2.NSFWDetectorResponse.FromString,
+                _registered_method=True)
+        self.DetectNSFWImg = channel.unary_unary(
+                '/nsfw_detector.NSFWDetector/DetectNSFWImg',
+                request_serializer=nsfw__detector__pb2.NSFWDetectorRequestImg.SerializeToString,
                 response_deserializer=nsfw__detector__pb2.NSFWDetectorResponse.FromString,
                 _registered_method=True)
 
@@ -49,7 +59,19 @@ class NSFWDetectorStub(object):
 class NSFWDetectorServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def DetectNSFW(self, request, context):
+    def DetectNSFWVideoId(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DetectNSFWURL(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DetectNSFWImg(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -58,9 +80,19 @@ class NSFWDetectorServicer(object):
 
 def add_NSFWDetectorServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'DetectNSFW': grpc.unary_unary_rpc_method_handler(
-                    servicer.DetectNSFW,
-                    request_deserializer=nsfw__detector__pb2.NSFWDetectorRequest.FromString,
+            'DetectNSFWVideoId': grpc.unary_unary_rpc_method_handler(
+                    servicer.DetectNSFWVideoId,
+                    request_deserializer=nsfw__detector__pb2.NSFWDetectorRequestVideoId.FromString,
+                    response_serializer=nsfw__detector__pb2.NSFWDetectorResponse.SerializeToString,
+            ),
+            'DetectNSFWURL': grpc.unary_unary_rpc_method_handler(
+                    servicer.DetectNSFWURL,
+                    request_deserializer=nsfw__detector__pb2.NSFWDetectorRequestURL.FromString,
+                    response_serializer=nsfw__detector__pb2.NSFWDetectorResponse.SerializeToString,
+            ),
+            'DetectNSFWImg': grpc.unary_unary_rpc_method_handler(
+                    servicer.DetectNSFWImg,
+                    request_deserializer=nsfw__detector__pb2.NSFWDetectorRequestImg.FromString,
                     response_serializer=nsfw__detector__pb2.NSFWDetectorResponse.SerializeToString,
             ),
     }
@@ -75,7 +107,7 @@ class NSFWDetector(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def DetectNSFW(request,
+    def DetectNSFWVideoId(request,
             target,
             options=(),
             channel_credentials=None,
@@ -88,8 +120,62 @@ class NSFWDetector(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/nsfw_detector.NSFWDetector/DetectNSFW',
-            nsfw__detector__pb2.NSFWDetectorRequest.SerializeToString,
+            '/nsfw_detector.NSFWDetector/DetectNSFWVideoId',
+            nsfw__detector__pb2.NSFWDetectorRequestVideoId.SerializeToString,
+            nsfw__detector__pb2.NSFWDetectorResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DetectNSFWURL(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/nsfw_detector.NSFWDetector/DetectNSFWURL',
+            nsfw__detector__pb2.NSFWDetectorRequestURL.SerializeToString,
+            nsfw__detector__pb2.NSFWDetectorResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DetectNSFWImg(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/nsfw_detector.NSFWDetector/DetectNSFWImg',
+            nsfw__detector__pb2.NSFWDetectorRequestImg.SerializeToString,
             nsfw__detector__pb2.NSFWDetectorResponse.FromString,
             options,
             channel_credentials,

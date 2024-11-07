@@ -14,17 +14,21 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13nsfw_detector.proto\x12\rnsfw_detector\"\'\n\x13NSFWDetectorRequest\x12\x10\n\x08video_id\x18\x01 \x01(\t\":\n\x14NSFWDetectorResponse\x12\x0f\n\x07nsfw_ec\x18\x01 \x01(\t\x12\x11\n\tnsfw_gore\x18\x02 \x01(\t2g\n\x0cNSFWDetector\x12W\n\nDetectNSFW\x12\".nsfw_detector.NSFWDetectorRequest\x1a#.nsfw_detector.NSFWDetectorResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13nsfw_detector.proto\x12\rnsfw_detector\".\n\x1aNSFWDetectorRequestVideoId\x12\x10\n\x08video_id\x18\x01 \x01(\t\"%\n\x16NSFWDetectorRequestURL\x12\x0b\n\x03url\x18\x01 \x01(\t\"\'\n\x16NSFWDetectorRequestImg\x12\r\n\x05image\x18\x01 \x01(\t\"Q\n\x14NSFWDetectorResponse\x12\x0f\n\x07nsfw_ec\x18\x01 \x01(\t\x12\x11\n\tnsfw_gore\x18\x02 \x01(\t\x12\x15\n\rcsam_detected\x18\x03 \x01(\x08\x32\xb3\x02\n\x0cNSFWDetector\x12\x65\n\x11\x44\x65tectNSFWVideoId\x12).nsfw_detector.NSFWDetectorRequestVideoId\x1a#.nsfw_detector.NSFWDetectorResponse\"\x00\x12]\n\rDetectNSFWURL\x12%.nsfw_detector.NSFWDetectorRequestURL\x1a#.nsfw_detector.NSFWDetectorResponse\"\x00\x12]\n\rDetectNSFWImg\x12%.nsfw_detector.NSFWDetectorRequestImg\x1a#.nsfw_detector.NSFWDetectorResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'nsfw_detector_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_NSFWDETECTORREQUEST']._serialized_start=38
-  _globals['_NSFWDETECTORREQUEST']._serialized_end=77
-  _globals['_NSFWDETECTORRESPONSE']._serialized_start=79
-  _globals['_NSFWDETECTORRESPONSE']._serialized_end=137
-  _globals['_NSFWDETECTOR']._serialized_start=139
-  _globals['_NSFWDETECTOR']._serialized_end=242
+  _globals['_NSFWDETECTORREQUESTVIDEOID']._serialized_start=38
+  _globals['_NSFWDETECTORREQUESTVIDEOID']._serialized_end=84
+  _globals['_NSFWDETECTORREQUESTURL']._serialized_start=86
+  _globals['_NSFWDETECTORREQUESTURL']._serialized_end=123
+  _globals['_NSFWDETECTORREQUESTIMG']._serialized_start=125
+  _globals['_NSFWDETECTORREQUESTIMG']._serialized_end=164
+  _globals['_NSFWDETECTORRESPONSE']._serialized_start=166
+  _globals['_NSFWDETECTORRESPONSE']._serialized_end=247
+  _globals['_NSFWDETECTOR']._serialized_start=250
+  _globals['_NSFWDETECTOR']._serialized_end=557
 # @@protoc_insertion_point(module_scope)

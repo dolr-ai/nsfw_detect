@@ -16,7 +16,7 @@ class NSFWDetect:
         credentials = service_account.Credentials.from_service_account_info(service_acc_creds)
         self.gclient = vision.ImageAnnotatorClient(credentials=credentials)
 
-    def nsfw_detect(self, imgs):
+    def explicit_detect(self, imgs):
         marks = {'QUESTIONABLE provocative': 'provocative',
         'QUESTIONABLE porn': 'explicit',
         'QUESTIONABLE neutral': 'neutral',
@@ -38,13 +38,23 @@ class NSFWDetect:
         res3cs = self.pipe3c(imgs)
         res5cs = self.pipe5c(imgs)
 
-        mark3cs = [max(res3c, key=lambda x: x['score']) for res3c in res3cs]
-        mark5cs = [max(res5c, key=lambda x: x['score']) for res5c in res5cs] 
+        """
+        This is how the res3cs and res5cs look like 
+        res3cs: [[{'label': 'QUESTIONABLE', 'score': 0.9604137539863586}, {'label': 'UNSAFE', 'score': 0.6502232551574707}, {'label': 'SAFE', 'score': 0.03905165567994118}], [{'label': 'SAFE', 'score': 0.9722312092781067}, {'label': 'UNSAFE', 'score': 0.31041547656059265}, {'label': 'QUESTIONABLE', 'score': 0.185553178191185}], [{'label': 'UNSAFE', 'score': 0.7398239970207214}, {'label': 'SAFE', 'score': 0.7222445607185364}, {'label': 'QUESTIONABLE', 'score': 0.2648926079273224}]]
+        res5cs: [[{'label': 'provocative', 'score': 0.9864626526832581}, {'label': 'neutral', 'score': 0.7108702063560486}, {'label': 'drawings', 'score': 0.22955366969108582}, {'label': 'hentai', 'score': 0.14005741477012634}, {'label': 'porn', 'score': 0.1315544694662094}], [{'label': 'neutral', 'score': 0.99712735414505}, {'label': 'hentai', 'score': 0.25641435384750366}, {'label': 'provocative', 'score': 0.23076564073562622}, {'label': 'drawings', 'score': 0.2289031445980072}, {'label': 'porn', 'score': 0.10852369666099548}], [{'label': 'neutral', 'score': 0.9969491362571716}, {'label': 'drawings', 'score': 0.37695300579071045}, {'label': 'hentai', 'score': 0.15976859629154205}, {'label': 'provocative', 'score': 0.14641618728637695}, {'label': 'porn', 'score': 0.14610938727855682}]]
+        
+        
+        Output corresponding to each image is a list of [{label, score}...] 
+        and the res is a list of such lists
+        """
 
-        marks = [(marks[mark3c['label'] + ' ' + mark5c['label']], mark3c['score'], mark5c['score']) for mark3c, mark5c in zip(mark3cs, mark5cs)]
+        mark3cs = [max(res3c, key=lambda x: x['score']) for res3c in res3cs] # maintaining the max score with the label
+        mark5cs = [max(res5c, key=lambda x: x['score']) for res5c in res5cs] # maintaining the max score with the label
+
+        marks = [(marks[mark3c['label'] + ' ' + mark5c['label']], mark3c['score'], mark5c['score']) for mark3c, mark5c in zip(mark3cs, mark5cs)] # zipped label 
         return marks
 
-    def detect_nsfw_gore(self, pil_image):
+    def gore_detect(self, pil_image):
         try:
             """Detects NSFW content in a PIL image and returns the safe search annotation."""
 
@@ -112,6 +122,6 @@ if __name__ == "__main__":
     img2 = Image.open("/Users/jaydhanwant/Downloads/3.jpg")
     img3 = Image.open("/Users/jaydhanwant/Documents/questionable.png")
     imgs = [img, img2, img3]
-    result = detector.nsfw_detect(imgs) 
+    result = detector.explicit_detect(imgs) 
     print(result)
     

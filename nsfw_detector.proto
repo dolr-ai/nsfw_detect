@@ -2,15 +2,26 @@ syntax = "proto3";
 
 package nsfw_detector;
 
-message NSFWDetectorRequest {
+message NSFWDetectorRequestVideoId {
     string video_id = 1;
+}
+
+message NSFWDetectorRequestURL {
+    string url = 1;
+}
+
+message NSFWDetectorRequestImg {
+    string image = 1;
 }
 
 message NSFWDetectorResponse {
     string nsfw_ec = 1;
     string nsfw_gore = 2;
+    bool csam_detected = 3;
 }
 
 service NSFWDetector {
-    rpc DetectNSFW(NSFWDetectorRequest) returns (NSFWDetectorResponse) {};
+    rpc DetectNSFWVideoId(NSFWDetectorRequestVideoId) returns (NSFWDetectorResponse) {};
+    rpc DetectNSFWURL(NSFWDetectorRequestURL) returns (NSFWDetectorResponse) {};
+    rpc DetectNSFWImg(NSFWDetectorRequestImg) returns (NSFWDetectorResponse) {};
 }

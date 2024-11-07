@@ -21,9 +21,9 @@ jobs:
         run: |
           flyctl secrets set --stage --app "yral-nsfw-classification" "SERVICE_CRED=$SERVICE_CRED"
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_NSFW_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_IO_DEPLOY_TOKENS }}
           SERVICE_CRED: ${{ secrets.SERVICE_CRED }}
       - name: Deploy a docker container to fly.io
         run: flyctl deploy --remote-only
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_NSFW_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_IO_DEPLOY_TOKENS }}

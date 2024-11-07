@@ -19,13 +19,16 @@ from utils.gcs_utils import get_images_from_gcs
 from nsfw_detect_utils import NSFWDetect
 from save_model_artifacts import download_artifacts # hardocded the gcr paths here TODO: Move that to a config
 import torch 
-
+from PIL import Image
+import io
+import base64
+import requests
 
 _LOGGER = logging.getLogger(__name__)
 
 _ONE_DAY = datetime.timedelta(days=1)
 _PROCESS_COUNT = multiprocessing.cpu_count()
-# _PROCESS_COUNT = 1 
+# _PROCESS_COUNT = 1 # TODO: change this back after testing
 _THREAD_CONCURRENCY = 10 # heuristic
 _BIND_ADDRESS = "[::]:50051"
 
@@ -94,19 +97,33 @@ class NSFWDetectorServicer(nsfw_detector_pb2_grpc.NSFWDetectorServicer):
         _LOGGER.info(self.pipe5c.model.config)
         _LOGGER.info('='*100)
 
-    def DetectNSFW(self, request, context):
+    def DetectNSFWVideoId(self, request, context):
         _LOGGER.info("Request received")
         video_id = request.video_id
         nsfw_tag, gore_tag = self.process_frames(video_id)
-        response = nsfw_detector_pb2.NSFWDetectorResponse(nsfw_ec=nsfw_tag, nsfw_gore=gore_tag)
+        response = nsfw_detector_pb2.NSFWDetectorResponse(nsfw_ec=nsfw_tag, nsfw_gore=gore_tag, csam_detected=False)
+        return response
+
+    def DetectNSFWURL(self, request, context):
+        _LOGGER.info("Request received")
+        image_url = request.url
+        nsfw_tag, gore_tag = self.process_image_url(image_url)
+        response = nsfw_detector_pb2.NSFWDetectorResponse(nsfw_ec=nsfw_tag, nsfw_gore=gore_tag, csam_detected=False)
+        return response
+
+    def DetectNSFWImg(self, request, context):
+        _LOGGER.info("Request received")
+        image_byte64 = request.image
+        nsfw_tag, gore_tag = self.process_image_byte64(image_byte64)
+        response = nsfw_detector_pb2.NSFWDetectorResponse(nsfw_ec=nsfw_tag, nsfw_gore=gore_tag, csam_detected=False)
         return response
 
     def process_frames(self, video_id):
         frames = get_images_from_gcs("yral-video-frames", video_id)
-        nsfw_tags = self.nsfw_detector.nsfw_detect([frame['image'] for frame in frames]) 
+        nsfw_tags = self.nsfw_detector.explicit_detect([frame['image'] for frame in frames]) 
         gore_tags = []
         for frame in frames:
-            gore_tags.append(self.nsfw_detector.detect_nsfw_gore(frame['image']))
+            gore_tags.append(self.nsfw_detector.gore_detect(frame['image']))
         tag_priority = "explicit nudity provocative neutral".split()
         gore_priority = ["UNKNOWN", "VERY_UNLIKELY", "UNLIKELY", "POSSIBLE", "LIKELY", "VERY_LIKELY"][::-1]
         # Sort nsfw_tags based on the priority defined in tag_priority
@@ -124,6 +141,26 @@ class NSFWDetectorServicer(nsfw_detector_pb2_grpc.NSFWDetectorServicer):
             
         return [nsfw_tag, gore_tag]
 
+    def process_image_byte64(self, image_byte64):
+        image = Image.open(io.BytesIO(base64.b64decode(image_byte64)))
+        nsfw_res = self.nsfw_detector.explicit_detect([image])[0]
+        mark3c_score = nsfw_res[1]
+        mark5c_score = nsfw_res[2]
+        if mark3c_score > 0.82 and mark5c_score > 0.9:
+            nsfw_tag = nsfw_res[0]
+        else:
+            nsfw_tag = None 
+
+        gore_tag = self.nsfw_detector.gore_detect(image)
+        return [nsfw_tag, gore_tag]
+
+    def process_image_url(self, image_url):
+        image = Image.open(requests.get(image_url, stream=True).raw)
+        buffered = io.BytesIO()
+        image.save(buffered, format="JPEG")
+        image_byte64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        nsfw_res = self.process_image_byte64(image_byte64)
+        return nsfw_res
 
         
 
