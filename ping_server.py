@@ -8,7 +8,7 @@ token_fpath = "/Users/jaydhanwant/Documents/SS/nsfw_jwt_token.txt"
 with open(token_fpath, 'r') as f:
     _JWT_TOKEN = f.read()
 
-server_url = 'yral-nsfw-classification.fly.dev:443'
+server_url = 'prod-yral-nsfw-classification.fly.dev:443'
 # Load the private key from a path specified in an environment variable
 
 def run():
