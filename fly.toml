@@ -22,7 +22,7 @@ swap_size_mb = 32768
     port = 443
     handlers = ['tls']
 
-    [services.ports.tls_optionse]
+    [services.ports.tls_options]
       alpn = ['h2']
 
   [services.concurrency]
@@ -32,4 +32,4 @@ swap_size_mb = 32768
 [[vm]]
   memory = '8gb'
   cpu_kind = 'performance'
-  cpus = 4
+  cpus = 1
