@@ -35,10 +35,11 @@ _BIND_ADDRESS = "[::]:50051"
 
 _AUTH_HEADER_KEY = "authorization"
 
-_PUBLIC_KEY = consts.NSFW_JWT_PUB_KEY
-_JWT_PAYLOAD = {
+# _PUBLIC_KEY = consts.NSFW_JWT_PUB_KEY
+_PUBLIC_KEY = os.environ.get("PUBLIC_KEY_TO_VERIFY_INCOMING_CALLS_FROM_FRONTEND_LEPTOS_SSR_SERVICE")
+_JWT_PAYLOAD =  {
     "sub": "yral-nsfw-detector-server",
-    "company": "gobazzinga",
+    "company": "Yral",
 }
 
 # downloading model artifacts 
