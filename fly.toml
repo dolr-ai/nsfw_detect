@@ -10,26 +10,24 @@ kill_timeout = '5s'
 swap_size_mb = 32768
 
 [env]
-  PORT = '50051'
+PORT = '50051'
 
 [[services]]
-  protocol = 'tcp'
-  internal_port = 50051
-  auto_stop_machines = true
-  auto_start_machines = true
-  
-  [[services.ports]]
-    port = 443
-    handlers = ['tls']
+protocol = 'tcp'
+internal_port = 50051
 
-    [services.ports.tls_options]
-      alpn = ['h2']
+[[services.ports]]
+port = 443
+handlers = ['tls']
 
-  [services.concurrency]
-    hard_limit = 500
-    soft_limit = 250
+[services.ports.tls_options]
+alpn = ['h2']
+
+[services.concurrency]
+hard_limit = 500
+soft_limit = 250
 
 [[vm]]
-  memory = '8gb'
-  cpu_kind = 'performance'
-  cpus = 1
+memory = '16gb'
+cpu_kind = 'performance'
+cpus = 8
