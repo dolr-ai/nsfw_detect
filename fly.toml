@@ -24,7 +24,7 @@ handlers = ['tls']
 alpn = ['h2']
 
 [services.concurrency]
-hard_limit = 500
+hard_limit = 2500
 soft_limit = 250
 
 [[vm]]
