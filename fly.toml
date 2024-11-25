@@ -15,6 +15,8 @@ PORT = '50051'
 [[services]]
 protocol = 'tcp'
 internal_port = 50051
+auto_stop_machines = true
+auto_start_machines = true
 
 [[services.ports]]
 port = 443
@@ -24,10 +26,10 @@ handlers = ['tls']
 alpn = ['h2']
 
 [services.concurrency]
-hard_limit = 2500
-soft_limit = 30
+hard_limit = 500
+soft_limit = 250
 
 [[vm]]
-memory = '16gb'
+memory = '8gb'
 cpu_kind = 'performance'
-cpus = 8
+cpus = 1
