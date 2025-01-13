@@ -18,6 +18,7 @@ import nsfw_detector_pb2_grpc
 from utils.gcs_utils import get_images_from_gcs
 from nsfw_detect_utils import NSFWDetect
 from save_model_artifacts import download_artifacts # hardocded the gcr paths here TODO: Move that to a config
+from bigquery_client import BigQueryClient
 import torch 
 from PIL import Image
 import io
@@ -35,7 +36,7 @@ _BIND_ADDRESS = "[::]:50051"
 
 _AUTH_HEADER_KEY = "authorization"
 
-# _PUBLIC_KEY = consts.NSFW_JWT_PUB_KEY
+_PUBLIC_KEY = consts.NSFW_JWT_PUB_KEY
 _PUBLIC_KEY = os.environ.get("PUBLIC_KEY_TO_VERIFY_INCOMING_CALLS_FROM_FRONTEND_LEPTOS_SSR_SERVICE")
 _JWT_PAYLOAD =  {
     "sub": "yral-nsfw-detector-server",
@@ -44,7 +45,7 @@ _JWT_PAYLOAD =  {
 
 # downloading model artifacts 
 artifact_path = "model_artifacts"
-artifact_files = ['pipe3c.pkl', 'pipe5c.pkl']
+artifact_files = ['pipe3c.pkl', 'pipe5c.pkl', 'nsfw_rf_classifier_40k.pkl']
 missing_files = [file for file in artifact_files if not os.path.exists(os.path.join(artifact_path, file))]
 
 if missing_files:
@@ -60,11 +61,14 @@ def load_model_artifacts(artifact_path):
         pipe3c = pickle.load(f)
     with open(artifact_path + '/pipe5c.pkl', "rb") as f:
         pipe5c = pickle.load(f)
+    with open(artifact_path + '/nsfw_rf_classifier_40k.pkl', "rb") as f:
+        nsfw_model = pickle.load(f)
 
     pipe3c.device = device
     pipe5c.device = device
     
-    return pipe3c, pipe5c
+    return pipe3c, pipe5c, nsfw_model
+    # return 1,1,nsfw_model
 
 class SignatureValidationInterceptor(grpc.ServerInterceptor):
     def __init__(self):
@@ -91,8 +95,9 @@ class SignatureValidationInterceptor(grpc.ServerInterceptor):
 
 class NSFWDetectorServicer(nsfw_detector_pb2_grpc.NSFWDetectorServicer):
     def __init__(self):
-        self.pipe3c, self.pipe5c = load_model_artifacts("model_artifacts")
+        self.pipe3c, self.pipe5c, self.nsfw_model = load_model_artifacts("model_artifacts")
         self.nsfw_detector = NSFWDetect(self.pipe3c, self.pipe5c)
+        self.bq_client = BigQueryClient()
         _LOGGER.info("Loaded models: ")
         _LOGGER.info(self.pipe3c.model.config) 
         _LOGGER.info(self.pipe5c.model.config)
@@ -117,6 +122,18 @@ class NSFWDetectorServicer(nsfw_detector_pb2_grpc.NSFWDetectorServicer):
         image_byte64 = request.image
         nsfw_tag, gore_tag = self.process_image_byte64(image_byte64)
         response = nsfw_detector_pb2.NSFWDetectorResponse(nsfw_ec=nsfw_tag, nsfw_gore=gore_tag, csam_detected=False)
+        return response
+    
+    def DetectNSFWEmbedding(self, request, context):
+        _LOGGER.info("Request received")
+        video_id = request.video_id
+        embedding_list = self.bq_client.get_embeddings(video_id)
+        if len(embedding_list) > 0:
+            probabilities = self.nsfw_model.predict_proba(embedding_list)[:,-1]
+            probability = float(probabilities.max())
+            response = nsfw_detector_pb2.EmbeddingNSFWDetectorResponse(probability=probability)
+        else:
+            response = nsfw_detector_pb2.EmbeddingNSFWDetectorResponse(probability=0.0)
         return response
 
     def process_frames(self, video_id):
@@ -178,7 +195,7 @@ def _run_server():
 
     server = grpc.server(
         futures.ThreadPoolExecutor(max_workers=_THREAD_CONCURRENCY),
-        interceptors=(SignatureValidationInterceptor(),),
+        # interceptors=(SignatureValidationInterceptor(),), # TODO: decomment this when on prod
         options=options,
     )
     nsfw_detector_pb2_grpc.add_NSFWDetectorServicer_to_server(
