@@ -195,7 +195,7 @@ def _run_server():
 
     server = grpc.server(
         futures.ThreadPoolExecutor(max_workers=_THREAD_CONCURRENCY),
-        # interceptors=(SignatureValidationInterceptor(),), # TODO: decomment this when on prod
+        interceptors=(SignatureValidationInterceptor(),), # TODO: decomment this when on prod
         options=options,
     )
     nsfw_detector_pb2_grpc.add_NSFWDetectorServicer_to_server(
