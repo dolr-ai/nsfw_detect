@@ -44,7 +44,8 @@ def run():
 
         print("Sending embedding request to server")
         video_id = "5c50e567999c4f9d8af20658c517639a"
-        embedding_response = stub.DetectNSFWEmbedding(nsfw_detector_pb2.EmbeddingNSFWDetectorRequest(video_id=video_id), metadata=metadata)
+        embedding_response = stub.DetectNSFWVideoId(nsfw_detector_pb2.EmbeddingNSFWDetectorRequest(video_id=video_id), metadata=metadata)
+        # embedding_response = stub.DetectNSFWEmbedding(nsfw_detector_pb2.EmbeddingNSFWDetectorRequest(video_id=video_id), metadata=metadata)
         print(embedding_response)
     except grpc.RpcError as e:
         print(f"RPC failed: {e}")

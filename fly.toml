@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for stage-yral-nsfw-classification-lively-feather-5294 on 2025-01-13T22:25:46+05:30
+# fly.toml app configuration file generated for yral-nsfw-classification on 2024-10-01T07:13:02+05:30
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -9,37 +9,27 @@ kill_signal = 'SIGINT'
 kill_timeout = '5s'
 swap_size_mb = 32768
 
-[build]
-
 [env]
-  PORT = '50051'
-
-[http_service]
-  internal_port = 50051
-  force_https = true
-  auto_stop_machines = 'stop'
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ['app']
+PORT = '50051'
 
 [[services]]
-  protocol = 'tcp'
-  internal_port = 50051
-  auto_stop_machines = 'stop'
-  auto_start_machines = true
+protocol = 'tcp'
+internal_port = 50051
+auto_stop_machines = true
+auto_start_machines = true
 
-  [[services.ports]]
-    port = 443
-    handlers = ['tls']
+[[services.ports]]
+port = 443
+handlers = ['tls']
 
-    [services.ports.tls_options]
-      alpn = ['h2']
+[services.ports.tls_options]
+alpn = ['h2']
 
-  [services.concurrency]
-    hard_limit = 500
-    soft_limit = 250
+[services.concurrency]
+hard_limit = 500
+soft_limit = 250
 
 [[vm]]
-  memory = '8gb'
-  cpu_kind = 'performance'
-  cpus = 1
+memory = '8gb'
+cpu_kind = 'performance'
+cpus = 1
