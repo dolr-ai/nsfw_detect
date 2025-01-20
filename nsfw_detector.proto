@@ -20,8 +20,17 @@ message NSFWDetectorResponse {
     bool csam_detected = 3;
 }
 
+message EmbeddingNSFWDetectorRequest {
+    string video_id = 1;
+}
+
+message EmbeddingNSFWDetectorResponse {
+    float probability = 1;
+}
+
 service NSFWDetector {
     rpc DetectNSFWVideoId(NSFWDetectorRequestVideoId) returns (NSFWDetectorResponse) {};
     rpc DetectNSFWURL(NSFWDetectorRequestURL) returns (NSFWDetectorResponse) {};
     rpc DetectNSFWImg(NSFWDetectorRequestImg) returns (NSFWDetectorResponse) {};
+    rpc DetectNSFWEmbedding(EmbeddingNSFWDetectorRequest) returns (EmbeddingNSFWDetectorResponse) {};
 }

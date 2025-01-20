@@ -49,15 +49,21 @@ def download_artifacts():
     if not os.path.exists("model_artifacts/pipe5c.pkl"):
         download_blob("yral-ds-model-artifacts", "pipe5c.pkl", "model_artifacts/pipe5c.pkl")
 
+    if not os.path.exists("model_artifacts/nsfw_rf_classifier_40k.pkl"):
+        download_blob("yral-ds-model-artifacts", "nsfw_rf_classifier_40k.pkl", "model_artifacts/nsfw_rf_classifier_40k.pkl")
+
     with open("model_artifacts/pipe3c.pkl", "rb") as f:
         pipe3c = pickle.load(f)
 
     with open("model_artifacts/pipe5c.pkl", "rb") as f: 
         pipe5c = pickle.load(f)
 
+    with open("model_artifacts/nsfw_rf_classifier_40k.pkl", "rb") as f:
+        nsfw_rf_classifier_40k = pickle.load(f)
+
     print(pipe3c.model.config)  
     print(pipe5c.model.config)  
 
-    return pipe3c, pipe5c
+    return pipe3c, pipe5c, nsfw_rf_classifier_40k
 
 
