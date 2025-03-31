@@ -5,6 +5,7 @@ import pickle
 from google.cloud import storage
 from google.oauth2 import service_account
 import json
+import consts
 
 def download_blob(bucket_name, source_blob_name, destination_file_name):
     """Downloads a blob from the bucket."""
@@ -16,11 +17,13 @@ def download_blob(bucket_name, source_blob_name, destination_file_name):
 
     # The path to which the file should be downloaded
     # destination_file_name = "local/path/to/file"
+
+    print(f"Downloading {source_blob_name} from {bucket_name} to {destination_file_name}")
     
     service_cred = os.environ.get("SERVICE_CRED")
     service_acc_creds = json.loads(service_cred)
     credentials = service_account.Credentials.from_service_account_info(service_acc_creds)
-    storage_client = storage.Client(credentials=credentials, project="hot-or-not-feed-intelligence")
+    storage_client = storage.Client(credentials=credentials, project=consts.PROJECT_NAME)
 
     bucket = storage_client.bucket(bucket_name)
 
@@ -43,23 +46,27 @@ def download_artifacts():
     os.makedirs("model_artifacts", exist_ok=True)
 
     # Download the files if they don't already exist
-    if not os.path.exists("model_artifacts/pipe3c.pkl"):
-        download_blob("yral-ds-model-artifacts", "pipe3c.pkl", "model_artifacts/pipe3c.pkl")
+    for artifact_file in consts.MODEL_ARTIFACTS_FILES:
+        if not os.path.exists(f"model_artifacts/{artifact_file}"):
+            download_blob(
+                consts.MODEL_ARTIFACTS_BUCKET, 
+                artifact_file, 
+                f"model_artifacts/{artifact_file}"
+            )
 
-    if not os.path.exists("model_artifacts/pipe5c.pkl"):
-        download_blob("yral-ds-model-artifacts", "pipe5c.pkl", "model_artifacts/pipe5c.pkl")
+    # Load the models
+    pipe3c = None
+    pipe5c = None
+    nsfw_rf_classifier_40k = None
 
-    if not os.path.exists("model_artifacts/nsfw_rf_classifier_40k.pkl"):
-        download_blob("yral-ds-model-artifacts", "nsfw_rf_classifier_40k.pkl", "model_artifacts/nsfw_rf_classifier_40k.pkl")
-
-    with open("model_artifacts/pipe3c.pkl", "rb") as f:
-        pipe3c = pickle.load(f)
-
-    with open("model_artifacts/pipe5c.pkl", "rb") as f: 
-        pipe5c = pickle.load(f)
-
-    with open("model_artifacts/nsfw_rf_classifier_40k.pkl", "rb") as f:
-        nsfw_rf_classifier_40k = pickle.load(f)
+    for artifact_file in consts.MODEL_ARTIFACTS_FILES:
+        with open(f"model_artifacts/{artifact_file}", "rb") as f:
+            if artifact_file == "pipe3c.pkl":
+                pipe3c = pickle.load(f)
+            elif artifact_file == "pipe5c.pkl":
+                pipe5c = pickle.load(f)
+            elif artifact_file == "nsfw_rf_classifier_40k.pkl":
+                nsfw_rf_classifier_40k = pickle.load(f)
 
     print(pipe3c.model.config)  
     print(pipe5c.model.config)  

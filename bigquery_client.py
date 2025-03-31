@@ -38,7 +38,7 @@ class BigQueryClient:
 
     def get_embeddings(self, video_id):
         uri = video_id_to_uri(video_id)
-        query = f"SELECT ml_generate_embedding_result as embedding FROM `hot-or-not-feed-intelligence.yral_ds.video_embeddings` WHERE uri = '{uri}'"
+        query = f"SELECT ml_generate_embedding_result as embedding FROM `{consts.VIDEO_EMBEDDINGS_TABLE}` WHERE uri = '{uri}'"
         df = self.query(query)
         return validate_embedding_dim(df.embedding.tolist())
 
@@ -46,5 +46,5 @@ class BigQueryClient:
 
 if __name__ == "__main__":
     bq_client = BigQueryClient()
-    embedding_list = (bq_client.get_embeddings("5c50e567999c4f9d8af20658c517639a"))
-    print(embedding_list)
+    df = bq_client.query(f"SELECT * FROM `{consts.VIDEO_EMBEDDINGS_TABLE}` LIMIT 10")
+    print(df)

@@ -214,3 +214,4 @@ current_requirements.txt
 Dockerfile.dev
 backfill_nsfw.py
 nsfw_responses/
+.env

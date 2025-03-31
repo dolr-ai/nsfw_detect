@@ -28,9 +28,10 @@ import requests
 _LOGGER = logging.getLogger(__name__)
 
 _ONE_DAY = datetime.timedelta(days=1)
-_PROCESS_COUNT = multiprocessing.cpu_count()
-# _PROCESS_COUNT = 1 # TODO: change this back after testing
-_THREAD_CONCURRENCY = 10 # heuristic
+# _PROCESS_COUNT = multiprocessing.cpu_count()
+_PROCESS_COUNT = 1 # TODO: change this back after testing
+# _THREAD_CONCURRENCY = 10 # heuristic
+_THREAD_CONCURRENCY = 1 # TODO: change this back after testing
 _BIND_ADDRESS = "[::]:50051"
 
 
@@ -45,8 +46,10 @@ _JWT_PAYLOAD =  {
 
 # downloading model artifacts 
 artifact_path = "model_artifacts"
-artifact_files = ['pipe3c.pkl', 'pipe5c.pkl', 'nsfw_rf_classifier_40k.pkl']
-missing_files = [file for file in artifact_files if not os.path.exists(os.path.join(artifact_path, file))]
+missing_files = [
+    file for file in consts.MODEL_ARTIFACTS_FILES 
+    if not os.path.exists(os.path.join(artifact_path, file))
+]
 
 if missing_files:
     download_artifacts()
@@ -57,12 +60,14 @@ def load_model_artifacts(artifact_path):
     print("Loading model artifacts")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    with open(artifact_path + '/pipe3c.pkl', "rb") as f:
-        pipe3c = pickle.load(f)
-    with open(artifact_path + '/pipe5c.pkl', "rb") as f:
-        pipe5c = pickle.load(f)
-    with open(artifact_path + '/nsfw_rf_classifier_40k.pkl', "rb") as f:
-        nsfw_model = pickle.load(f)
+    for file in consts.MODEL_ARTIFACTS_FILES:
+        with open(artifact_path + f'/{file}', "rb") as f:
+            if file == "pipe3c.pkl":
+                pipe3c = pickle.load(f)
+            elif file == "pipe5c.pkl":
+                pipe5c = pickle.load(f)
+            elif file == "nsfw_rf_classifier_40k.pkl":
+                nsfw_model = pickle.load(f)
 
     pipe3c.device = device
     pipe5c.device = device
@@ -126,17 +131,24 @@ class NSFWDetectorServicer(nsfw_detector_pb2_grpc.NSFWDetectorServicer):
     
     def DetectNSFWEmbedding(self, request, context):
         _LOGGER.info("Request received")
+        print(f"Processing embedding for video {request.video_id}")
         video_id = request.video_id
+        print(f"Getting embeddings for video {video_id}")
         embedding_list = self.bq_client.get_embeddings(video_id)
+        print(f"Len embedding list: {len(embedding_list)}")
         if len(embedding_list) > 0:
             probabilities = self.nsfw_model.predict_proba(embedding_list)[:,-1]
+            print(f"Probabilities: {probabilities}")
             probability = float(probabilities.max())
+            print(f"Probability: {probability}")
             response = nsfw_detector_pb2.EmbeddingNSFWDetectorResponse(probability=probability)
+            print(f"Response: {response}")
         else:
             response = nsfw_detector_pb2.EmbeddingNSFWDetectorResponse(probability=0.0)
         return response
 
     def process_frames(self, video_id):
+        print(f"Processing frames for video {video_id}")
         frames = get_images_from_gcs("yral-video-frames", video_id)
         nsfw_tags = self.nsfw_detector.explicit_detect([frame['image'] for frame in frames]) 
         gore_tags = []
@@ -195,7 +207,7 @@ def _run_server():
 
     server = grpc.server(
         futures.ThreadPoolExecutor(max_workers=_THREAD_CONCURRENCY),
-        interceptors=(SignatureValidationInterceptor(),), # TODO: decomment this when on prod
+        # interceptors=(SignatureValidationInterceptor(),), # TODO: decomment this when on prod
         options=options,
     )
     nsfw_detector_pb2_grpc.add_NSFWDetectorServicer_to_server(

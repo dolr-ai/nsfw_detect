@@ -37,9 +37,10 @@ def run():
         #     image_byte64 = base64.b64encode(image_file.read()).decode('utf-8')
         # byte64_response = stub.DetectNSFWImg(nsfw_detector_pb2.NSFWDetectorRequestImg(image=image_byte64), metadata=metadata)
         # print(byte64_response)
-        video_id = "5c50e567999c4f9d8af20658c517639a"
+        # video_id = "5c50e567999c4f9d8af20658c517639a"
+        video_id = "2c313ed6256d4c2b985e25001071fc33"
         embedding_response = stub.DetectNSFWEmbedding(nsfw_detector_pb2.EmbeddingNSFWDetectorRequest(video_id=video_id), metadata=metadata)
-        print(embedding_response)
+        print(f"Embedding response: {embedding_response.probability}")
 
         
 
